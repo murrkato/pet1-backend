@@ -10,6 +10,7 @@ namespace pet1_backend.Services
       bool IsValidEmail(string email);
       bool IsValidPassword(string password);
       UserDtoError IsUserValid(UserRegDto user);
+      UserDtoError IsUserLoginValid(UserLoginDto user);
       string GetErrByFieldName(string fieldName);
     }
 
@@ -71,12 +72,43 @@ namespace pet1_backend.Services
         return result;
       }
 
+      public UserDtoError IsUserLoginValid(UserLoginDto user)
+      {
+        var result = new UserDtoError { IsValid = false };
+        UserFields[] fields = [UserFields.Email, UserFields.Password];
+
+        foreach (var field in fields)
+        {
+          if (!IsValidLoginField(user, field))
+          {
+            result.InvalidField = field.ToString();
+            return result;
+          }
+        }
+
+        result.IsValid = true;
+        return result;
+      }
+
       private bool IsValidField(UserRegDto user, UserFields field)
       {
         switch(field)
         {
           case UserFields.Username:
             return IsValidUsername(user.Username);
+          case UserFields.Email:
+            return IsValidEmail(user.Email);
+          case UserFields.Password:
+            return IsValidPassword(user.Password);
+          default:
+            return false;
+        }
+      }
+
+      private bool IsValidLoginField(UserLoginDto user, UserFields field)
+      {
+        switch(field)
+        {
           case UserFields.Email:
             return IsValidEmail(user.Email);
           case UserFields.Password:
