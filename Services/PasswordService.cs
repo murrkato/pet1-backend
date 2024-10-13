@@ -34,7 +34,7 @@ namespace pet1_backend.Services
 
     public bool VerifyPasswordHash(string password, User user)
     {
-      var hashed = HashPassword(password, user.Salt); 
+      var hashed = HashPassword(password, user.Salt);
       return hashed.Value == user.PasswordHash;
     }
   }

@@ -66,7 +66,6 @@ namespace pet1_backend.Controllers
 
         if (valid.IsValid)
         {
-          user.Password = _passwordService.HashPassword(user.Password, null).Value;;
           User newUser = user.ToEntity(_passwordService);
 
           _context.Users.Add(newUser);
@@ -134,10 +133,7 @@ namespace pet1_backend.Controllers
         {
           User foundedUser = existingUser;
 
-          //TODO: check if password valid
           var isPassValid = _passwordService.VerifyPasswordHash(user.Password, foundedUser);
-
-          Console.WriteLine(isPassValid);
 
           if (isPassValid)
           {
