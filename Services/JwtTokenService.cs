@@ -3,7 +3,10 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using pet1_backend.Data;
+using pet1_backend.Data.Models;
 using pet1_backend.Dtos.Account.Client;
 
 namespace pet1_backend.Services
@@ -13,14 +16,17 @@ namespace pet1_backend.Services
     string GenerateToken(string userId, string username);
     HashedDataDto HashToken(string token);
     bool VerifyTokenHash(string token, string hashedToken);
+    public Task<AccessToken> CreateToken(User user, string accessToken);
   }
   public class JwtTokenService : IJWTTokenService
   {
     public readonly IConfiguration _configuration;
+    public AppDbContext _context;
 
-    public JwtTokenService(IConfiguration configuration)
+    public JwtTokenService(IConfiguration configuration, AppDbContext context)
     {
       _configuration = configuration;
+      _context = context;
     }
 
     public string GenerateToken(string userId, string username)
@@ -66,7 +72,8 @@ namespace pet1_backend.Services
 
       return new HashedDataDto {
         Value = hashedToken,
-        Salt = salt
+        Salt = salt,
+        Expires = DateTime.UtcNow.AddHours(24),
       };
     }
 
@@ -75,5 +82,34 @@ namespace pet1_backend.Services
       HashedDataDto hashedInputToken = HashToken(token);
       return hashedInputToken.Value == hashedToken;
     }
+
+
+    //TODO: add delete token
+
+    public async Task<AccessToken> CreateToken(User user, string accessToken)
+    {
+      var oldToken = await _context.AccessTokens.FirstOrDefaultAsync(token => token.UserId == user.Id);
+
+      if (oldToken != null)
+      {
+        _context.AccessTokens.Remove(oldToken);
+        await _context.SaveChangesAsync();
+      }
+
+      HashedDataDto hashedToken = HashToken(accessToken);
+      var token = new AccessToken
+      {
+        Token = hashedToken.Value,
+        Salt = hashedToken.Salt,
+        CreatedAt = DateTime.UtcNow,
+        ExpiresAt = hashedToken.Expires ?? DateTime.UtcNow.AddHours(1),
+        UserId = user.Id
+      };
+
+      _context.AccessTokens.Add(token);
+      await _context.SaveChangesAsync();
+
+      return token;
+    } 
   }
 }

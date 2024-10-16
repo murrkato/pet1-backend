@@ -8,6 +8,9 @@ using pet1_backend.Data.Models;
 using pet1_backend.Data;
 using Microsoft.EntityFrameworkCore;
 using pet1_backend.Dtos.Account.Client;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 
 namespace pet1_backend.Controllers
 {
@@ -141,17 +144,19 @@ namespace pet1_backend.Controllers
             var userId = userResp.Id.ToString();
             var username = userResp.Username;
             var accessToken = _jwtTokenService.GenerateToken(userId, username);
-            userResp.AccessToken = accessToken;
+            var createdToken = await _jwtTokenService.CreateToken(foundedUser, accessToken);
+            // userResp.AccessToken = accessToken;
+            userResp.AccessToken = createdToken.Token;
 
-            HashedDataDto hashedToken = _jwtTokenService.HashToken(accessToken);
+            // HashedDataDto hashedToken = _jwtTokenService.HashToken(accessToken);
 
-            AccessToken token = new()
-            {
-              Token = hashedToken.Value,
-              Salt = hashedToken.Salt,
-              CreatedAt = DateTime.Now.ToUniversalTime(),
-              UserId = foundedUser.Id
-            }; 
+            // AccessToken token = new()
+            // {
+            //   Token = hashedToken.Value,
+            //   Salt = hashedToken.Salt,
+            //   CreatedAt = DateTime.Now.ToUniversalTime(),
+            //   UserId = foundedUser.Id
+            // }; 
 
             //TODO: add token to db
             var response = new PosResponse
@@ -178,6 +183,45 @@ namespace pet1_backend.Controllers
         negResp.ErrMessage = ValidationMessages.InvalidCredentials;
         return BadRequest(negResp);
       }
+    }
+
+    [HttpGet("logout")]
+    public async Task<IActionResult> Logout()
+    {
+      var service = "Logout";
+
+      var negResp = new NegResponse
+      {
+        Error = ValidationMessages._errorStatuses[400],
+        ErrMessage = ValidationMessages.NoToken,
+        Service = service,
+      };
+
+      var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+      if (string.IsNullOrEmpty(token))
+      {
+        return BadRequest(negResp);
+      }
+
+      var foundedToken = await _context.AccessTokens.FirstOrDefaultAsync(t => t.Token == token);
+
+      if (foundedToken == null)
+      {
+        negResp.ErrMessage = ValidationMessages.TokenNotFound;
+        return BadRequest(negResp);
+      }
+
+      _context.AccessTokens.Remove(foundedToken);
+      await _context.SaveChangesAsync();
+
+      var response = new PosResponse
+      {
+        Message = ValidationMessages.Logout,
+        Service = service
+      };
+
+      return Ok(response);
     }
   }
 }

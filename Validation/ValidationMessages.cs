@@ -19,6 +19,9 @@ namespace pet1_backend.Validation
     public const string UserNoExists = "There is no user with such email";
     public const string successCreation = "{0} is succesfully created";
     public const string InvalidCredentials = "Incorrect email or password";
+    public const string NoToken = "Token is required";
+    public const string TokenNotFound = "Token not found";
+    public const string Logout = "User is logged out";
     public static string GenerateRequiredMsg(string fieldName)
     {
       return string.Format(RequiredFieldTemplate, fieldName);
