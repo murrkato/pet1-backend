@@ -49,7 +49,7 @@ namespace pet1_backend.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AccessTokens");
+                    b.ToTable("AccessTokens", (string)null);
                 });
 
             modelBuilder.Entity("pet1_backend.Data.Models.User", b =>
@@ -86,7 +86,7 @@ namespace pet1_backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("pet1_backend.Data.Models.AccessToken", b =>

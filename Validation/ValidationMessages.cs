@@ -13,7 +13,14 @@ namespace pet1_backend.Validation
     public static Dictionary<int, string> _errorStatuses = new() {
       {400, "Failed"},
       {401, "Unauthorized"},
+      {403, "Forbidden"},
       {404, "Not found"}
+    };
+
+    public static Dictionary<int, string> _errMessages = new()
+    {
+      {401, "Authorization is required"},
+      {403, "Access denied"}
     };
     public const string UserExists = "User with such email is already exists";
     public const string UserNoExists = "There is no user with such email";

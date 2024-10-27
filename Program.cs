@@ -4,6 +4,7 @@ using pet1_backend.Data;
 using pet1_backend.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using pet1_backend.Middlewares;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -72,11 +73,20 @@ app.UseAuthorization();
 app.MapControllers();
 
 
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+var excludedRoutes = new[] { "/register", "/login"};
+
+app.MapWhen(context => !excludedRoutes.Any(r => r == context.Request.Path), builder =>
+{
+    builder.UseMiddleware<ValidateJwtToken>();
+});
 
 app.Run();

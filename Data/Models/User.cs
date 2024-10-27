@@ -13,5 +13,6 @@ namespace pet1_backend.Data.Models
     public string AccessToken {get; set;} = string.Empty;
     public DateTime CreatedAt {get; set;}
     public DateTime UpdatedAt {get; set;}
+    public virtual ICollection<Role> Roles {get; set;} = [];
   }
 }

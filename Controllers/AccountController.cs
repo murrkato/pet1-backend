@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using pet1_backend.Dtos.Account.Client;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore;
 
 namespace pet1_backend.Controllers
 {
